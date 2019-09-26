@@ -1,0 +1,136 @@
+package ${managerPackage};
+
+import ${doPackage}.${className}${doSuffix};
+import ${queryPackage}.${className}${queryPrefix};
+import ${pageResultPackage};
+import ${mapperExtPackage}.${className}${extMapperSuffix};
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+
+/**
+ * Manager for ${className}.
+ */
+@Component
+public class ${className}${managerSuffix} {
+
+    @Autowired
+    private ${className}${extMapperSuffix} ${classNameLower}${mapperSuffix};
+    
+    /**
+     * query count by query condition.
+     */
+    public int countBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()}){
+        return ${managerMapperName}.countBy${queryPrefix}(${queryPrefix.toLowerCase()});
+    }
+
+    /**
+     * query count by primary key.
+     */
+    public int countByPrimaryKey(${javaTypePk} ${propPkName}) {
+        return ${managerMapperName}.countByPrimaryKey(${propPkName});
+    }
+    
+    /**
+     * query count by primary key.
+     */
+    public boolean isExistByPrimaryKey(${javaTypePk} ${propPkName}) {
+        return (countByPrimaryKey(${propPkName}) > 0);
+    }
+
+    /**
+     * delete by query condition.
+     */
+    public int deleteBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()}) {
+        return ${managerMapperName}.deleteBy${queryPrefix}(${queryPrefix.toLowerCase()});
+    }
+
+    /**
+     * delete by primary key.
+     */
+    public int deleteByPrimaryKey(${javaTypePk} ${propPkName}) {
+        return ${managerMapperName}.deleteByPrimaryKey(${propPkName});
+    }
+
+    /**
+     * insert selective.
+     */
+    public int insertSelective(${className}${doSuffix} record) {
+        return ${managerMapperName}.insertSelective(record);
+    }
+    
+    /**
+     * insert selective.
+     */
+    public int batchInsert(List<${className}${doSuffix}> records) {
+        return ${managerMapperName}.batchInsert(records);
+    }
+
+    /**
+     * select by query condition.
+     */
+    public List<${className}${doSuffix}> selectBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()}) {
+        return ${managerMapperName}.selectBy${queryPrefix}(${queryPrefix.toLowerCase()});
+    }
+
+    /**
+     * select by query condition with page.
+    */
+    public PageResult<${className}${doSuffix}> selectBy${queryPrefix}WithPage(${className}${queryPrefix} ${queryPrefix.toLowerCase()}) {
+        PageResult<${className}${doSuffix}> result = new PageResult<>();
+        result.setPageSize(query.getPageSize());
+        result.setPageNo(query.getPageNo());
+        result.setTotalCount(this.countBy${queryPrefix}(${queryPrefix.toLowerCase()}));
+        result.setResult(this.selectBy${queryPrefix}(${queryPrefix.toLowerCase()}));
+        return result;
+    }
+
+    /**
+     * select by primary key.
+     */
+    public ${className}${doSuffix} selectByPrimaryKey(${javaTypePk} ${propPkName}) {
+        return ${managerMapperName}.selectByPrimaryKey(${propPkName});
+    }
+
+    /**
+     * update by query condition selective.
+     */
+    public int updateBy${queryPrefix}Selective(${className}${doSuffix} record, ${className}${queryPrefix} ${queryPrefix.toLowerCase()}) {
+        return ${managerMapperName}.updateBy${queryPrefix}Selective(record, ${queryPrefix.toLowerCase()});
+    }
+
+    /**
+     * update by query condition.
+     */
+    public int updateBy${queryPrefix}(${className}${doSuffix} record, ${className}${queryPrefix} ${queryPrefix.toLowerCase()}) {
+        return ${managerMapperName}.updateBy${queryPrefix}(record, ${queryPrefix.toLowerCase()});
+    }
+
+    /**
+     * update by primary key selective.
+     */
+    public int updateByPrimaryKeySelective(${className}${doSuffix} record) {
+        return ${managerMapperName}.updateByPrimaryKeySelective(record);
+    }
+    
+    /**
+     * batch update by primary key.
+     * @param records
+     * @return
+     */
+    public int batchUpdateByPrimaryKey(List<${className}${doSuffix}> records) {
+        return ${managerMapperName}.batchUpdateByPrimaryKey(records);
+    }
+        
+    /**
+     * batch update by primary key selective.
+     * @param records
+     * @return
+     */
+    public int batchUpdateByPrimaryKeySelective(List<${className}${doSuffix}> records) {
+        return ${managerMapperName}.batchUpdateByPrimaryKeySelective(records);
+    }
+    
+}

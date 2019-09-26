@@ -1,0 +1,112 @@
+package ${mapperPackage};
+
+import ${doPackage}.${className}${doSuffix};
+import ${queryPackage}.${className}${queryPrefix};
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
+
+/**
+ * MyBatis Mapper for ${className}.
+ */
+@Component
+@Mapper
+public interface ${className}${mapperSuffix} {
+
+    /**
+     * query count by query condition.
+     * @param ${queryPrefix.toLowerCase()}
+     * @return
+     */
+    int countBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()});
+    
+    /**
+     * query count by primary key.
+     * @param ${propPkName}
+     * @return
+     */
+    int countByPrimaryKey(${javaTypePk} ${propPkName});
+
+    /**
+     * delete by query condition.
+     * @param ${queryPrefix.toLowerCase()}
+     * @return
+     */
+    int deleteBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()});
+
+    /**
+     * delete by primary key.
+     * @param ${propPkName}
+     * @return
+     */
+    int deleteByPrimaryKey(${javaTypePk} ${propPkName});
+
+    /**
+     * insert selective.
+     * @param record
+     * @return
+     */
+    int insertSelective(${className}${doSuffix} record);
+    
+    /**
+     * batch insert
+     * @param records
+     * @return
+     */
+    int batchInsert(@Param("records") List<${className}${doSuffix}> records);
+
+    /**
+     * select by query condition.
+     * @param ${queryPrefix.toLowerCase()}
+     * @return
+     */
+    List<${className}${doSuffix}> selectBy${queryPrefix}(${className}${queryPrefix} ${queryPrefix.toLowerCase()});
+
+    /**
+     * select by primary key.
+     * @param ${propPkName}
+     * @return
+     */
+    ${className}${doSuffix} selectByPrimaryKey(${javaTypePk} ${propPkName});
+
+    /**
+     * update by query condition selective.
+     * @param record
+     * @param ${queryPrefix.toLowerCase()}
+     * @return
+     */
+    int updateBy${queryPrefix}Selective(@Param("record") ${className}${doSuffix} record, @Param("${queryPrefix.toLowerCase()}") ${className}${queryPrefix} ${queryPrefix.toLowerCase()});
+
+    /**
+     * update by query condition.
+     * @param record
+     * @param ${queryPrefix.toLowerCase()}
+     * @return
+     */
+    int updateBy${queryPrefix}(@Param("record") ${className}${doSuffix} record, @Param("${queryPrefix.toLowerCase()}") ${className}${queryPrefix} ${queryPrefix.toLowerCase()});
+
+    /**
+     * update by primary key selective.
+     * @param record
+     * @return
+     */
+    int updateByPrimaryKeySelective(${className}${doSuffix} record);
+    
+    /**
+     * batch update by primary key.
+     * @param records
+     * @return
+     */
+    int batchUpdateByPrimaryKey(@Param("records") List<${className}${doSuffix}> records);
+    
+    /**
+     * batch update by primary key selective.
+     * @param records
+     * @return
+     */
+    int batchUpdateByPrimaryKeySelective(@Param("records") List<${className}${doSuffix}> records);
+    
+}

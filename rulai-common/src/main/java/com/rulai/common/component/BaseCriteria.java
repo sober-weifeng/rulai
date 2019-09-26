@@ -1,0 +1,61 @@
+package com.rulai.common.component;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BaseCriteria implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+
+    public static final String LEFT_BRACKET = "(";
+    public static final String RIGHT_BRACKET = ")";
+    
+    protected List<Criterion> criteria;
+
+    protected BaseCriteria() {
+        super();
+        criteria = new ArrayList<Criterion>();
+    }
+
+    public boolean isValid() {
+        return criteria.size() > 0;
+    }
+
+    public List<Criterion> getAllCriteria() {
+        return criteria;
+    }
+
+    public List<Criterion> getCriteria() {
+        return criteria;
+    }
+    
+    public void addCondition(String condition) {
+        if (condition == null) {
+            throw new RuntimeException("Value for condition cannot be null");
+        }
+        condition = condition.trim();
+        criteria.add(new Criterion(condition));
+    }
+
+    protected void addCriterion(String condition) {
+        if (condition == null) {
+            throw new RuntimeException("Value for condition cannot be null");
+        }
+        criteria.add(new Criterion(condition));
+    }
+
+    protected void addCriterion(String condition, Object value, String property) {
+        if (value == null) {
+            throw new RuntimeException("Value for " + property + " cannot be null");
+        }
+        criteria.add(new Criterion(condition, value));
+    }
+
+    protected void addCriterion(String condition, Object value1, Object value2, String property) {
+        if (value1 == null || value2 == null) {
+            throw new RuntimeException("Between values for " + property + " cannot be null");
+        }
+        criteria.add(new Criterion(condition, value1, value2));
+    }
+}

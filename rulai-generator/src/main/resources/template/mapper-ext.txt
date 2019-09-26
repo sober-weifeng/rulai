@@ -1,0 +1,14 @@
+package ${mapperExtPackage};
+
+import ${mapperPackage}.${className}${mapperSuffix};
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
+
+/**
+ * MyBatis Ext Mapper for ${className}.
+ */
+@Component
+@Mapper
+public interface ${className}${extMapperSuffix} extends ${className}${mapperSuffix} {
+
+}

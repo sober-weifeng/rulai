@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rulai.spider.mapper.MeishijieCookbookDetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.rulai.spider.bean.model.MeishijieCookbookDetailDO">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+        <result column="gmt_update" jdbcType="TIMESTAMP" property="gmtUpdate" />
+        <result column="cookbook_url" jdbcType="VARCHAR" property="cookbookUrl" />
+        <result column="cookbook_name" jdbcType="VARCHAR" property="cookbookName" />
+        <result column="title" jdbcType="VARCHAR" property="title" />
+        <result column="cover_picture" jdbcType="VARCHAR" property="coverPicture" />
+        <result column="technology" jdbcType="VARCHAR" property="technology" />
+        <result column="difficulty" jdbcType="VARCHAR" property="difficulty" />
+        <result column="numberofpeople" jdbcType="VARCHAR" property="numberofpeople" />
+        <result column="taste" jdbcType="VARCHAR" property="taste" />
+        <result column="setuptime" jdbcType="VARCHAR" property="setuptime" />
+        <result column="cooktime" jdbcType="VARCHAR" property="cooktime" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="main_ingredients" jdbcType="VARCHAR" property="mainIngredients" />
+        <result column="sup_ingredients" jdbcType="VARCHAR" property="supIngredients" />
+        <result column="steps" jdbcType="VARCHAR" property="steps" />
+        <result column="tip" jdbcType="VARCHAR" property="tip" />
+    </resultMap>
+
+    <sql id="Query_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <foreach collection="criteria.criteria" item="criterion">
+                        <choose>
+                            <when test="criterion.noValue">
+                                AND ${criterion.condition}
+                            </when>
+                            <when test="criterion.singleValue">
+                                AND ${criterion.condition} #{criterion.value}
+                            </when>
+                            <when test="criterion.betweenValue">
+                                AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                            </when>
+                            <when test="criterion.listValue">
+                                AND ${criterion.condition}
+                            <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                #{listItem}
+                            </foreach>
+                            </when>
+                        </choose>
+                    </foreach>
+                </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Update_By_Query_Where_Clause">
+        <where>
+            <foreach collection="query.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    AND ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    AND ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    AND ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List">
+        id,gmt_create,gmt_update,cookbook_url,cookbook_name,title,cover_picture,technology,difficulty,numberofpeople,taste,setuptime,cooktime,description,main_ingredients,sup_ingredients,steps,tip
+    </sql>
+
+    <select id="countByQuery" parameterType="com.rulai.spider.bean.query.MeishijieCookbookDetailQuery" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM meishijie_cookbook_detail
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </select>
+    
+    <select id="countByPrimaryKey" parameterType="Long" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM meishijie_cookbook_detail WHERE id = #{id, jdbcType=BIGINT} 
+    </select>
+
+    <select id="selectByQuery" parameterType="com.rulai.spider.bean.query.MeishijieCookbookDetailQuery" resultMap="BaseResultMap">
+        SELECT
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List" />
+            FROM meishijie_cookbook_detail
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+        <if test="orderByClause != null">
+            ORDER BY ${orderByClause}
+        </if>
+        <include refid="MysqlDialectSuffix" />
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" /> FROM meishijie_cookbook_detail WHERE id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+        DELETE FROM meishijie_cookbook_detail WHERE id = #{id, jdbcType=BIGINT}
+    </delete>
+
+    <delete id="deleteByQuery" parameterType="com.rulai.spider.bean.query.MeishijieCookbookDetailQuery">
+        DELETE FROM meishijie_cookbook_detail
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.rulai.spider.bean.model.MeishijieCookbookDetailDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO meishijie_cookbook_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            <if test="cookbookUrl != null">
+                cookbook_url,
+            </if>
+            <if test="cookbookName != null">
+                cookbook_name,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="coverPicture != null">
+                cover_picture,
+            </if>
+            <if test="technology != null">
+                technology,
+            </if>
+            <if test="difficulty != null">
+                difficulty,
+            </if>
+            <if test="numberofpeople != null">
+                numberofpeople,
+            </if>
+            <if test="taste != null">
+                taste,
+            </if>
+            <if test="setuptime != null">
+                setuptime,
+            </if>
+            <if test="cooktime != null">
+                cooktime,
+            </if>
+            <if test="description != null">
+                description,
+            </if>
+            <if test="mainIngredients != null">
+                main_ingredients,
+            </if>
+            <if test="supIngredients != null">
+                sup_ingredients,
+            </if>
+            <if test="steps != null">
+                steps,
+            </if>
+            <if test="tip != null">
+                tip,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            NOW(), NOW(),
+            <if test="cookbookUrl != null">
+                #{cookbookUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="cookbookName != null">
+                #{cookbookName,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="coverPicture != null">
+                #{coverPicture,jdbcType=VARCHAR},
+            </if>
+            <if test="technology != null">
+                #{technology,jdbcType=VARCHAR},
+            </if>
+            <if test="difficulty != null">
+                #{difficulty,jdbcType=VARCHAR},
+            </if>
+            <if test="numberofpeople != null">
+                #{numberofpeople,jdbcType=VARCHAR},
+            </if>
+            <if test="taste != null">
+                #{taste,jdbcType=VARCHAR},
+            </if>
+            <if test="setuptime != null">
+                #{setuptime,jdbcType=VARCHAR},
+            </if>
+            <if test="cooktime != null">
+                #{cooktime,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="mainIngredients != null">
+                #{mainIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="supIngredients != null">
+                #{supIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="steps != null">
+                #{steps,jdbcType=VARCHAR},
+            </if>
+            <if test="tip != null">
+                #{tip,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert" parameterType="com.rulai.spider.bean.model.MeishijieCookbookDetailDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO meishijie_cookbook_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            cookbook_url,
+            cookbook_name,
+            title,
+            cover_picture,
+            technology,
+            difficulty,
+            numberofpeople,
+            taste,
+            setuptime,
+            cooktime,
+            description,
+            main_ingredients,
+            sup_ingredients,
+            steps,
+            tip,
+        </trim>
+        VALUES
+        <foreach collection="records" item="record" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                NOW(), NOW(),
+                #{record.cookbookUrl,jdbcType=VARCHAR},
+                #{record.cookbookName,jdbcType=VARCHAR},
+                #{record.title,jdbcType=VARCHAR},
+                #{record.coverPicture,jdbcType=VARCHAR},
+                #{record.technology,jdbcType=VARCHAR},
+                #{record.difficulty,jdbcType=VARCHAR},
+                #{record.numberofpeople,jdbcType=VARCHAR},
+                #{record.taste,jdbcType=VARCHAR},
+                #{record.setuptime,jdbcType=VARCHAR},
+                #{record.cooktime,jdbcType=VARCHAR},
+                #{record.description,jdbcType=VARCHAR},
+                #{record.mainIngredients,jdbcType=VARCHAR},
+                #{record.supIngredients,jdbcType=VARCHAR},
+                #{record.steps,jdbcType=VARCHAR},
+                #{record.tip,jdbcType=VARCHAR},
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateByQuerySelective" parameterType="map">
+        UPDATE meishijie_cookbook_detail
+        <set>
+            gmt_update=now(),
+            <if test="record.cookbookUrl != null">
+                cookbook_url = #{record.cookbookUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="record.cookbookName != null">
+                cookbook_name = #{record.cookbookName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.title != null">
+                title = #{record.title,jdbcType=VARCHAR},
+            </if>
+            <if test="record.coverPicture != null">
+                cover_picture = #{record.coverPicture,jdbcType=VARCHAR},
+            </if>
+            <if test="record.technology != null">
+                technology = #{record.technology,jdbcType=VARCHAR},
+            </if>
+            <if test="record.difficulty != null">
+                difficulty = #{record.difficulty,jdbcType=VARCHAR},
+            </if>
+            <if test="record.numberofpeople != null">
+                numberofpeople = #{record.numberofpeople,jdbcType=VARCHAR},
+            </if>
+            <if test="record.taste != null">
+                taste = #{record.taste,jdbcType=VARCHAR},
+            </if>
+            <if test="record.setuptime != null">
+                setuptime = #{record.setuptime,jdbcType=VARCHAR},
+            </if>
+            <if test="record.cooktime != null">
+                cooktime = #{record.cooktime,jdbcType=VARCHAR},
+            </if>
+            <if test="record.description != null">
+                description = #{record.description,jdbcType=VARCHAR},
+            </if>
+            <if test="record.mainIngredients != null">
+                main_ingredients = #{record.mainIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="record.supIngredients != null">
+                sup_ingredients = #{record.supIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="record.steps != null">
+                steps = #{record.steps,jdbcType=VARCHAR},
+            </if>
+            <if test="record.tip != null">
+                tip = #{record.tip,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByQuery" parameterType="map">
+        UPDATE meishijie_cookbook_detail
+        SET
+        cookbook_url = #{record.cookbookUrl,jdbcType=VARCHAR},
+        cookbook_name = #{record.cookbookName,jdbcType=VARCHAR},
+        title = #{record.title,jdbcType=VARCHAR},
+        cover_picture = #{record.coverPicture,jdbcType=VARCHAR},
+        technology = #{record.technology,jdbcType=VARCHAR},
+        difficulty = #{record.difficulty,jdbcType=VARCHAR},
+        numberofpeople = #{record.numberofpeople,jdbcType=VARCHAR},
+        taste = #{record.taste,jdbcType=VARCHAR},
+        setuptime = #{record.setuptime,jdbcType=VARCHAR},
+        cooktime = #{record.cooktime,jdbcType=VARCHAR},
+        description = #{record.description,jdbcType=VARCHAR},
+        main_ingredients = #{record.mainIngredients,jdbcType=VARCHAR},
+        sup_ingredients = #{record.supIngredients,jdbcType=VARCHAR},
+        steps = #{record.steps,jdbcType=VARCHAR},
+        tip = #{record.tip,jdbcType=VARCHAR},
+        gmt_update = NOW()
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.MeishijieCookbookDetailDO">
+        UPDATE meishijie_cookbook_detail
+        <set>
+            gmt_update=NOW(),
+            <if test="cookbookUrl != null">
+                cookbook_url = #{cookbookUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="cookbookName != null">
+                cookbook_name = #{cookbookName,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="coverPicture != null">
+                cover_picture = #{coverPicture,jdbcType=VARCHAR},
+            </if>
+            <if test="technology != null">
+                technology = #{technology,jdbcType=VARCHAR},
+            </if>
+            <if test="difficulty != null">
+                difficulty = #{difficulty,jdbcType=VARCHAR},
+            </if>
+            <if test="numberofpeople != null">
+                numberofpeople = #{numberofpeople,jdbcType=VARCHAR},
+            </if>
+            <if test="taste != null">
+                taste = #{taste,jdbcType=VARCHAR},
+            </if>
+            <if test="setuptime != null">
+                setuptime = #{setuptime,jdbcType=VARCHAR},
+            </if>
+            <if test="cooktime != null">
+                cooktime = #{cooktime,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="mainIngredients != null">
+                main_ingredients = #{mainIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="supIngredients != null">
+                sup_ingredients = #{supIngredients,jdbcType=VARCHAR},
+            </if>
+            <if test="steps != null">
+                steps = #{steps,jdbcType=VARCHAR},
+            </if>
+            <if test="tip != null">
+                tip = #{tip,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE id = #{id, jdbcType=BIGINT}
+    </update>
+    
+    <update id="batchUpdateByPrimaryKey" parameterType="com.rulai.spider.bean.model.MeishijieCookbookDetailDO">
+        UPDATE meishijie_cookbook_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="cookbook_url = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.cookbookUrl, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="cookbook_name = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.cookbookName, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="title = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.title, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="cover_picture = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.coverPicture, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="technology = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.technology, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="difficulty = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.difficulty, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="numberofpeople = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.numberofpeople, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="taste = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.taste, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="setuptime = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.setuptime, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="cooktime = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.cooktime, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="description = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.description, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="main_ingredients = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.mainIngredients, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="sup_ingredients = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.supIngredients, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="steps = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.steps, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="tip = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.tip, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+    
+    <update id="batchUpdateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.MeishijieCookbookDetailDO">
+        UPDATE meishijie_cookbook_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="cookbook_url = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.cookbookUrl != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.cookbookUrl, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cookbook_name = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.cookbookName != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.cookbookName, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="title = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.title != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.title, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cover_picture = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.coverPicture != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.coverPicture, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="technology = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.technology != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.technology, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="difficulty = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.difficulty != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.difficulty, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="numberofpeople = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.numberofpeople != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.numberofpeople, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="taste = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.taste != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.taste, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="setuptime = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.setuptime != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.setuptime, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cooktime = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.cooktime != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.cooktime, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="description = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.description != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.description, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="main_ingredients = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.mainIngredients != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.mainIngredients, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="sup_ingredients = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.supIngredients != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.supIngredients, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="steps = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.steps != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.steps, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="tip = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.tip != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.tip, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <sql id="MysqlDialectSuffix">
+        <if test="pageOffset &gt;= 0 and pageSize &gt; 0">
+            <![CDATA[ LIMIT #{pageOffset,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER} ]]>
+        </if>
+    </sql>
+
+</mapper>

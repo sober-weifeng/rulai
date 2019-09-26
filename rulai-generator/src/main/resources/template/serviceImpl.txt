@@ -1,0 +1,22 @@
+package ${serviceImplPackage};
+
+import ${servicePackage}.${className}${serviceSuffix};
+import ${managerPackage}.${className}${managerSuffix};
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
+/**
+ * Manager for ${className}.
+ */
+@Component
+public class ${className}${serviceImplSuffix} implements ${className}${serviceSuffix}{
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ${className}${managerSuffix} ${classNameLower}${managerSuffix};
+    
+}

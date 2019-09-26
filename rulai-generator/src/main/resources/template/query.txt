@@ -1,0 +1,181 @@
+package ${queryPackage};
+
+import ${baseQueryPackage};
+import ${baseCriteriaPackage};
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * <p>${className}${queryPrefix}</p>
+ * @date ${currentTime}
+ */
+public class ${className}${queryPrefix} extends BaseQuery implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach($item in $allList)
+    public static final String PROP_KEY_${item.columnName.toUpperCase()} = "${item.propName}";
+    
+#end
+    public ${className}${queryPrefix}() {
+        super();
+    }
+
+    public Criteria or() {
+        Criteria criteria = createCriteriaInternal();
+        super.oredCriteria.add(criteria);
+        return criteria;
+    }
+
+    public Criteria createCriteria() {
+        Criteria criteria = createCriteriaInternal();
+        if (oredCriteria.size() == 0) {
+            oredCriteria.add(criteria);
+        }
+        return criteria;
+    }
+
+    protected Criteria createCriteriaInternal() {
+        return new Criteria();
+    }
+
+    /**
+     * This class corresponds to the database table ${tableName}
+     */
+    protected abstract static class GeneratedCriteria extends BaseCriteria {
+    
+        private static final long serialVersionUID = 1L;
+
+        protected GeneratedCriteria() {
+            super();
+        }
+        
+#foreach($item in $allList)
+#set($colName=$item.propName.substring(0, 1).toUpperCase() + $item.propName.substring(1))
+#set($colPropKeyName="PROP_KEY_" + ${item.columnName.toUpperCase()})
+        public Criteria and${colName}IsNull() {
+            addCriterion("${item.columnName} is null");
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}IsNotNull() {
+            addCriterion("${item.columnName} is not null");
+            return (Criteria) this;
+        }
+
+#if($item.javaType == "String")
+        public Criteria and${colName}EqualToIgnoreCase(${item.javaType} value) {
+            addCriterion("UPPER(${item.columnName}) =", value.trim().toUpperCase(), $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#end
+        public Criteria and${colName}EqualTo(${item.javaType} value) {
+            addCriterion("${item.columnName} =", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}NotEqualTo(${item.javaType} value) {
+            addCriterion("${item.columnName} <>", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#if($item.javaType == "String")
+        public Criteria and${colName}NotEqualToIgnoreCase(${item.javaType} value) {
+            addCriterion("UPPER(${item.columnName}) <>", value.trim().toUpperCase(), $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#end
+
+        public Criteria and${colName}GreaterThan(${item.javaType} value) {
+            addCriterion("${item.columnName} >", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}GreaterThanOrEqualTo(${item.javaType} value) {
+            addCriterion("${item.columnName} >=", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}LessThan(${item.javaType} value) {
+            addCriterion("${item.columnName} <", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}LessThanOrEqualTo(${item.javaType} value) {
+            addCriterion("${item.columnName} <=", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}Like(${item.javaType} value) {
+            addCriterion("${item.columnName} like", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+#if($item.javaType == "String")
+        public Criteria and${colName}LikeIgnoreCase(${item.javaType} value) {
+            addCriterion("UPPER(${item.columnName}) like", "%" + value.trim().toUpperCase() + "%", $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#end
+
+        public Criteria and${colName}NotLike(${item.javaType} value) {
+            addCriterion("${item.columnName} not like", value, $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#if($item.javaType == "String")
+        public Criteria and${colName}NotLikeIgnoreCase(${item.javaType} value) {
+            addCriterion("UPPER(${item.columnName}) not like", "%" + value.trim().toUpperCase() + "%", $colPropKeyName);
+            return (Criteria) this;
+        }
+        
+#end
+
+        public Criteria and${colName}In(List<${item.javaType}> values) {
+            addCriterion("${item.columnName} in", values, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}NotIn(List<${item.javaType}> values) {
+            addCriterion("${item.columnName} not in", values, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}Between(${item.javaType} value1, ${item.javaType} value2) {
+            addCriterion("${item.columnName} between", value1, value2, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+        public Criteria and${colName}NotBetween(${item.javaType} value1, ${item.javaType} value2) {
+            addCriterion("${item.columnName} not between", value1, value2, $colPropKeyName);
+            return (Criteria) this;
+        }
+
+#end
+    }
+
+    /**
+     * This class corresponds to the database table ${tableName}
+    */
+    public static class Criteria extends GeneratedCriteria{
+    
+        private static final long serialVersionUID = 1L;
+    
+        protected Criteria() {
+            super();
+        }
+        
+    }
+
+    @Override
+    public String toString(){
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.DEFAULT_STYLE);
+    }
+}

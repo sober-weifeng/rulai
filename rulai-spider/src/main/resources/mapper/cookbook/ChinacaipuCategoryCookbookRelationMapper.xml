@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rulai.spider.mapper.ChinacaipuCategoryCookbookRelationMapper">
+
+    <resultMap id="BaseResultMap" type="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+        <result column="gmt_update" jdbcType="TIMESTAMP" property="gmtUpdate" />
+        <result column="top_category_id" jdbcType="BIGINT" property="topCategoryId" />
+        <result column="second_category_id" jdbcType="BIGINT" property="secondCategoryId" />
+        <result column="cookbook_url_id" jdbcType="BIGINT" property="cookbookUrlId" />
+    </resultMap>
+
+    <sql id="Query_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <foreach collection="criteria.criteria" item="criterion">
+                        <choose>
+                            <when test="criterion.noValue">
+                                AND ${criterion.condition}
+                            </when>
+                            <when test="criterion.singleValue">
+                                AND ${criterion.condition} #{criterion.value}
+                            </when>
+                            <when test="criterion.betweenValue">
+                                AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                            </when>
+                            <when test="criterion.listValue">
+                                AND ${criterion.condition}
+                            <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                #{listItem}
+                            </foreach>
+                            </when>
+                        </choose>
+                    </foreach>
+                </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Update_By_Query_Where_Clause">
+        <where>
+            <foreach collection="query.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    AND ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    AND ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    AND ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List">
+        id,gmt_create,gmt_update,top_category_id,second_category_id,cookbook_url_id
+    </sql>
+
+    <select id="countByQuery" parameterType="com.rulai.spider.bean.query.ChinacaipuCategoryCookbookRelationQuery" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM chinacaipu_category_cookbook_relation
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </select>
+    
+    <select id="countByPrimaryKey" parameterType="Long" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM chinacaipu_category_cookbook_relation WHERE id = #{id, jdbcType=BIGINT} 
+    </select>
+
+    <select id="selectByQuery" parameterType="com.rulai.spider.bean.query.ChinacaipuCategoryCookbookRelationQuery" resultMap="BaseResultMap">
+        SELECT
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List" />
+            FROM chinacaipu_category_cookbook_relation
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+        <if test="orderByClause != null">
+            ORDER BY ${orderByClause}
+        </if>
+        <include refid="MysqlDialectSuffix" />
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" /> FROM chinacaipu_category_cookbook_relation WHERE id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+        DELETE FROM chinacaipu_category_cookbook_relation WHERE id = #{id, jdbcType=BIGINT}
+    </delete>
+
+    <delete id="deleteByQuery" parameterType="com.rulai.spider.bean.query.ChinacaipuCategoryCookbookRelationQuery">
+        DELETE FROM chinacaipu_category_cookbook_relation
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chinacaipu_category_cookbook_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            <if test="topCategoryId != null">
+                top_category_id,
+            </if>
+            <if test="secondCategoryId != null">
+                second_category_id,
+            </if>
+            <if test="cookbookUrlId != null">
+                cookbook_url_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            NOW(), NOW(),
+            <if test="topCategoryId != null">
+                #{topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="secondCategoryId != null">
+                #{secondCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="cookbookUrlId != null">
+                #{cookbookUrlId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert" parameterType="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chinacaipu_category_cookbook_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            <if test="topCategoryId != null">
+                top_category_id,
+            </if>
+            <if test="secondCategoryId != null">
+                second_category_id,
+            </if>
+            <if test="cookbookUrlId != null">
+                cookbook_url_id,
+            </if>
+        </trim>
+        VALUES
+        <foreach collection="records" item="record" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                NOW(), NOW(),
+                <if test="topCategoryId != null">
+                    #{record.topCategoryId,jdbcType=BIGINT},
+                </if>
+                <if test="secondCategoryId != null">
+                    #{record.secondCategoryId,jdbcType=BIGINT},
+                </if>
+                <if test="cookbookUrlId != null">
+                    #{record.cookbookUrlId,jdbcType=BIGINT},
+                </if>
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateByQuerySelective" parameterType="map">
+        UPDATE chinacaipu_category_cookbook_relation
+        <set>
+            gmt_update=now(),
+            <if test="record.topCategoryId != null">
+                top_category_id = #{record.topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="record.secondCategoryId != null">
+                second_category_id = #{record.secondCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="record.cookbookUrlId != null">
+                cookbook_url_id = #{record.cookbookUrlId,jdbcType=BIGINT},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByQuery" parameterType="map">
+        UPDATE chinacaipu_category_cookbook_relation
+        SET
+        top_category_id = #{record.topCategoryId,jdbcType=BIGINT},
+        second_category_id = #{record.secondCategoryId,jdbcType=BIGINT},
+        cookbook_url_id = #{record.cookbookUrlId,jdbcType=BIGINT},
+        gmt_update = NOW()
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO">
+        UPDATE chinacaipu_category_cookbook_relation
+        <set>
+            gmt_update=NOW(),
+            <if test="topCategoryId != null">
+                top_category_id = #{topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="secondCategoryId != null">
+                second_category_id = #{secondCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="cookbookUrlId != null">
+                cookbook_url_id = #{cookbookUrlId,jdbcType=BIGINT},
+            </if>
+        </set>
+        WHERE id = #{id, jdbcType=BIGINT}
+    </update>
+    
+    <update id="batchUpdateByPrimaryKey" parameterType="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO">
+        UPDATE chinacaipu_category_cookbook_relation
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="top_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.topCategoryId, jdbcType=BIGINT}
+                </foreach>
+            </trim>
+            <trim prefix="second_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.secondCategoryId, jdbcType=BIGINT}
+                </foreach>
+            </trim>
+            <trim prefix="cookbook_url_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.cookbookUrlId, jdbcType=BIGINT}
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+    
+    <update id="batchUpdateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.ChinacaipuCategoryCookbookRelationDO">
+        UPDATE chinacaipu_category_cookbook_relation
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="top_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.topCategoryId != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.topCategoryId, jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="second_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.secondCategoryId != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.secondCategoryId, jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cookbook_url_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.cookbookUrlId != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.cookbookUrlId, jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <sql id="MysqlDialectSuffix">
+        <if test="pageOffset &gt;= 0 and pageSize &gt; 0">
+            <![CDATA[ LIMIT #{pageOffset,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER} ]]>
+        </if>
+    </sql>
+
+</mapper>

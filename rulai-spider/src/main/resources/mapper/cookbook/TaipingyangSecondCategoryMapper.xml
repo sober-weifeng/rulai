@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rulai.spider.mapper.TaipingyangSecondCategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+        <result column="gmt_update" jdbcType="TIMESTAMP" property="gmtUpdate" />
+        <result column="top_category_id" jdbcType="BIGINT" property="topCategoryId" />
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+        <result column="label_id" jdbcType="VARCHAR" property="labelId" />
+    </resultMap>
+
+    <sql id="Query_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <foreach collection="criteria.criteria" item="criterion">
+                        <choose>
+                            <when test="criterion.noValue">
+                                AND ${criterion.condition}
+                            </when>
+                            <when test="criterion.singleValue">
+                                AND ${criterion.condition} #{criterion.value}
+                            </when>
+                            <when test="criterion.betweenValue">
+                                AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                            </when>
+                            <when test="criterion.listValue">
+                                AND ${criterion.condition}
+                            <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                #{listItem}
+                            </foreach>
+                            </when>
+                        </choose>
+                    </foreach>
+                </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Update_By_Query_Where_Clause">
+        <where>
+            <foreach collection="query.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    AND ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    AND ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    AND ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List">
+        id,gmt_create,gmt_update,top_category_id,category_name,label_id
+    </sql>
+
+    <select id="countByQuery" parameterType="com.rulai.spider.bean.query.TaipingyangSecondCategoryQuery" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM taipingyang_second_category
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </select>
+    
+    <select id="countByPrimaryKey" parameterType="Long" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM taipingyang_second_category WHERE id = #{id, jdbcType=BIGINT} 
+    </select>
+
+    <select id="selectByQuery" parameterType="com.rulai.spider.bean.query.TaipingyangSecondCategoryQuery" resultMap="BaseResultMap">
+        SELECT
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List" />
+            FROM taipingyang_second_category
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+        <if test="orderByClause != null">
+            ORDER BY ${orderByClause}
+        </if>
+        <include refid="MysqlDialectSuffix" />
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" /> FROM taipingyang_second_category WHERE id = #{id, jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+        DELETE FROM taipingyang_second_category WHERE id = #{id, jdbcType=BIGINT}
+    </delete>
+
+    <delete id="deleteByQuery" parameterType="com.rulai.spider.bean.query.TaipingyangSecondCategoryQuery">
+        DELETE FROM taipingyang_second_category
+        <if test="_parameter != null">
+            <include refid="Query_Where_Clause" />
+        </if>
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO taipingyang_second_category
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            <if test="topCategoryId != null">
+                top_category_id,
+            </if>
+            <if test="categoryName != null">
+                category_name,
+            </if>
+            <if test="labelId != null">
+                label_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            NOW(), NOW(),
+            <if test="topCategoryId != null">
+                #{topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="categoryName != null">
+                #{categoryName,jdbcType=VARCHAR},
+            </if>
+            <if test="labelId != null">
+                #{labelId,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert" parameterType="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO taipingyang_second_category
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+            <if test="topCategoryId != null">
+                top_category_id,
+            </if>
+            <if test="categoryName != null">
+                category_name,
+            </if>
+            <if test="labelId != null">
+                label_id,
+            </if>
+        </trim>
+        VALUES
+        <foreach collection="records" item="record" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                NOW(), NOW(),
+                <if test="topCategoryId != null">
+                    #{record.topCategoryId,jdbcType=BIGINT},
+                </if>
+                <if test="categoryName != null">
+                    #{record.categoryName,jdbcType=VARCHAR},
+                </if>
+                <if test="labelId != null">
+                    #{record.labelId,jdbcType=VARCHAR},
+                </if>
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateByQuerySelective" parameterType="map">
+        UPDATE taipingyang_second_category
+        <set>
+            gmt_update=now(),
+            <if test="record.topCategoryId != null">
+                top_category_id = #{record.topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="record.categoryName != null">
+                category_name = #{record.categoryName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.labelId != null">
+                label_id = #{record.labelId,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByQuery" parameterType="map">
+        UPDATE taipingyang_second_category
+        SET
+        top_category_id = #{record.topCategoryId,jdbcType=BIGINT},
+        category_name = #{record.categoryName,jdbcType=VARCHAR},
+        label_id = #{record.labelId,jdbcType=VARCHAR},
+        gmt_update = NOW()
+        <if test="_parameter != null">
+            <include refid="Update_By_Query_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO">
+        UPDATE taipingyang_second_category
+        <set>
+            gmt_update=NOW(),
+            <if test="topCategoryId != null">
+                top_category_id = #{topCategoryId,jdbcType=BIGINT},
+            </if>
+            <if test="categoryName != null">
+                category_name = #{categoryName,jdbcType=VARCHAR},
+            </if>
+            <if test="labelId != null">
+                label_id = #{labelId,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE id = #{id, jdbcType=BIGINT}
+    </update>
+    
+    <update id="batchUpdateByPrimaryKey" parameterType="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO">
+        UPDATE taipingyang_second_category
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="top_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.topCategoryId, jdbcType=BIGINT}
+                </foreach>
+            </trim>
+            <trim prefix="category_name = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.categoryName, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="label_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN #{record.labelId, jdbcType=VARCHAR}
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+    
+    <update id="batchUpdateByPrimaryKeySelective" parameterType="com.rulai.spider.bean.model.TaipingyangSecondCategoryDO">
+        UPDATE taipingyang_second_category
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="top_category_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.topCategoryId != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.topCategoryId, jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="category_name = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.categoryName != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.categoryName, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="label_id = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.labelId != null">
+                        WHEN id = #{record.id, jdbcType=BIGINT} 
+                        THEN #{record.labelId, jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN id = #{record.id, jdbcType=BIGINT} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.id, jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <sql id="MysqlDialectSuffix">
+        <if test="pageOffset &gt;= 0 and pageSize &gt; 0">
+            <![CDATA[ LIMIT #{pageOffset,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER} ]]>
+        </if>
+    </sql>
+
+</mapper>

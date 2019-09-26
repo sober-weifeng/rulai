@@ -1,0 +1,8 @@
+package ${servicePackage};
+
+/**
+ * Service for ${className}.
+ */
+public interface ${className}${serviceSuffix} {
+    
+}

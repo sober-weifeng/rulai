@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${mapperPackage}.${className}${mapperSuffix}">
+
+    <resultMap id="BaseResultMap" type="${doPackage}.${className}${doSuffix}">
+#foreach($item in $allList)
+        <result column="${item.columnName}" jdbcType="${item.jdbcType}" property="${item.propName}" />
+#end
+    </resultMap>
+
+    <sql id="${queryPrefix}_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <foreach collection="criteria.criteria" item="criterion">
+                        <choose>
+                            <when test="criterion.noValue">
+                                AND ${criterion.condition}
+                            </when>
+                            <when test="criterion.singleValue">
+                                AND ${criterion.condition} #{criterion.value}
+                            </when>
+                            <when test="criterion.betweenValue">
+                                AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                            </when>
+                            <when test="criterion.listValue">
+                                AND ${criterion.condition}
+                            <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                #{listItem}
+                            </foreach>
+                            </when>
+                        </choose>
+                    </foreach>
+                </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Update_By_${queryPrefix}_Where_Clause">
+        <where>
+            <foreach collection="${queryPrefix.toLowerCase()}.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    AND ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    AND ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    AND ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    AND ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List">
+        ${cols}
+    </sql>
+
+    <select id="countBy${queryPrefix}" parameterType="${queryPackage}.${className}${queryPrefix}" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ${tableName}
+        <if test="_parameter != null">
+            <include refid="${queryPrefix}_Where_Clause" />
+        </if>
+    </select>
+    
+    <select id="countByPrimaryKey" parameterType="${javaTypePk}" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ${tableName} WHERE ${columnPkName} = #{${propPkName}, jdbcType=${jdbcTypePk}} 
+    </select>
+
+    <select id="selectBy${queryPrefix}" parameterType="${queryPackage}.${className}${queryPrefix}" resultMap="BaseResultMap">
+        SELECT
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List" />
+            FROM ${tableName}
+        <if test="_parameter != null">
+            <include refid="${queryPrefix}_Where_Clause" />
+        </if>
+        <if test="orderByClause != null">
+            ORDER BY ${orderByClause}
+        </if>
+        <include refid="MysqlDialectSuffix" />
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="${javaTypePk}" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" /> FROM ${tableName} WHERE ${columnPkName} = #{${propPkName}, jdbcType=${jdbcTypePk}}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="${javaTypePk}">
+        DELETE FROM ${tableName} WHERE ${columnPkName} = #{${propPkName}, jdbcType=${jdbcTypePk}}
+    </delete>
+
+    <delete id="deleteBy${queryPrefix}" parameterType="${queryPackage}.${className}${queryPrefix}">
+        DELETE FROM ${tableName}
+        <if test="_parameter != null">
+            <include refid="${queryPrefix}_Where_Clause" />
+        </if>
+    </delete>
+
+    <insert id="insertSelective" parameterType="${doPackage}.${className}${doSuffix}" useGeneratedKeys="true" keyProperty="${propPkName}">
+        INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <if test="${item.propName} != null">
+                ${item.columnName},
+            </if>
+#end
+#end
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            NOW(), NOW(),
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <if test="${item.propName} != null">
+                #{${item.propName},jdbcType=${item.jdbcType}},
+            </if>
+#end
+#end
+        </trim>
+    </insert>
+
+    <insert id="batchInsert" parameterType="${doPackage}.${className}${doSuffix}" useGeneratedKeys="true" keyProperty="${propPkName}">
+        INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gmt_create,gmt_update,
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            ${item.columnName},
+#end
+#end
+        </trim>
+        VALUES
+        <foreach collection="records" item="record" separator=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                NOW(), NOW(),
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+                #{record.${item.propName},jdbcType=${item.jdbcType}},
+#end
+#end
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateBy${queryPrefix}Selective" parameterType="map">
+        UPDATE ${tableName}
+        <set>
+            gmt_update=now(),
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <if test="record.${item.propName} != null">
+                ${item.columnName} = #{record.${item.propName},jdbcType=${item.jdbcType}},
+            </if>
+#end
+#end
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_${queryPrefix}_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateBy${queryPrefix}" parameterType="map">
+        UPDATE ${tableName}
+        SET
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+        ${item.columnName} = #{record.${item.propName},jdbcType=${item.jdbcType}},
+#end
+#end
+        gmt_update = NOW()
+        <if test="_parameter != null">
+            <include refid="Update_By_${queryPrefix}_Where_Clause" />
+        </if>
+    </update>
+
+    <update id="updateByPrimaryKeySelective" parameterType="${doPackage}.${className}${doSuffix}">
+        UPDATE ${tableName}
+        <set>
+            gmt_update=NOW(),
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <if test="${item.propName} != null">
+                ${item.columnName} = #{${item.propName},jdbcType=${item.jdbcType}},
+            </if>
+#end
+#end
+        </set>
+        WHERE ${columnPkName} = #{${propPkName}, jdbcType=${jdbcTypePk}}
+    </update>
+    
+    <update id="batchUpdateByPrimaryKey" parameterType="${doPackage}.${className}${doSuffix}">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <trim prefix="${item.columnName} = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN ${columnPkName} = #{record.${propPkName}, jdbcType=${jdbcTypePk}} 
+                    THEN #{record.${item.propName}, jdbcType=${item.jdbcType}}
+                </foreach>
+            </trim>
+#end
+#end
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN ${columnPkName} = #{record.${propPkName}, jdbcType=${jdbcTypePk}} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE ${columnPkName} IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.${propPkName}, jdbcType=${jdbcTypePk}}
+        </foreach>
+    </update>
+    
+    <update id="batchUpdateByPrimaryKeySelective" parameterType="${doPackage}.${className}${doSuffix}">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($item in $list)
+#if(${item.columnName} != ${columnPkName})
+            <trim prefix="${item.columnName} = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    <if test="record.${item.propName} != null">
+                        WHEN ${columnPkName} = #{record.${propPkName}, jdbcType=${jdbcTypePk}} 
+                        THEN #{record.${item.propName}, jdbcType=${item.jdbcType}}
+                    </if>
+                </foreach>
+            </trim>
+#end
+#end
+            <trim prefix="gmt_update = CASE" suffix="END,">
+                <foreach collection="records" item="record" index="index">
+                    WHEN ${columnPkName} = #{record.${propPkName}, jdbcType=${jdbcTypePk}} 
+                    THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE ${columnPkName} IN
+        <foreach collection="records" item="record" index="index" open="(" separator="," close=")">
+            #{record.${propPkName}, jdbcType=${jdbcTypePk}}
+        </foreach>
+    </update>
+
+    <sql id="MysqlDialectSuffix">
+        <if test="pageOffset &gt;= 0 and pageSize &gt; 0">
+            <![CDATA[ LIMIT #{pageOffset,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER} ]]>
+        </if>
+    </sql>
+
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rulai.spider.mapper.ext.XinshipuCookbookUrlExtMapper">
+
+    <select id="selectCookbookUrlNoCrawledMinMaxId" resultType="com.rulai.spider.bean.dto.xinshipu.CookbookUrlNoCrawledMinMaxIdDTO">
+        
+        SELECT MIN(id) AS minVal, MAX(id) AS maxVal, COUNT(1) AS totalCount FROM `xinshipu_cookbook_url` WHERE is_crawled = 1 AND is_effective = 1;
+        
+    </select>
+    
+</mapper>
