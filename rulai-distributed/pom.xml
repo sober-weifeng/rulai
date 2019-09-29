@@ -3,13 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>rulai-distributed-lock</artifactId>
         <groupId>com.rulai</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>rulai-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../rulai-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rulai-distributed-lock-mysql</artifactId>
+    <artifactId>rulai-distributed</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>rulai-distributed-lock</module>
+        <module>rulai-distributed-algorithm</module>
+    </modules>
 
 
 </project>

@@ -12,7 +12,7 @@
         <module>rulai-generator</module>
         <module>rulai-common</module>
         <module>rulai-mybatis</module>
-        <module>rulai-distributed-lock</module>
+        <module>rulai-distributed</module>
         <module>rulai-antlr</module>
     </modules>
     <name>rulai</name>
