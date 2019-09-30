@@ -14,6 +14,7 @@
         <module>rulai-mybatis</module>
         <module>rulai-distributed</module>
         <module>rulai-antlr</module>
+        <module>rulai-ldap</module>
     </modules>
     <name>rulai</name>
     <description>rulai project for Spring Boot</description>
