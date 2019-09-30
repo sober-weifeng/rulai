@@ -134,6 +134,12 @@
                 <artifactId>jldap</artifactId>
                 <version>2009-10-07</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase-client</artifactId>
+                <version>2.2.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
