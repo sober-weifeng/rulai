@@ -106,7 +106,7 @@ public abstract class AbstractLdapDialect {
     public static class LdapProperties {
         private String host;
         private int port;
-        private String username;
+        private String accountDN;
         private String password;
         private int version;
     }

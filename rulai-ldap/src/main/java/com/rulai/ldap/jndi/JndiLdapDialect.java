@@ -27,15 +27,17 @@ public class JndiLdapDialect extends AbstractLdapDialect {
 
     @Override
     public void connect() throws LdapException {
-        Hashtable<String, Object> env = new Hashtable<>();
-        String url = "ldap://" + properties.getHost() + ":" + properties.getPort();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, url);
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.SECURITY_PRINCIPAL, properties.getUsername());
-        env.put(Context.SECURITY_CREDENTIALS, properties.getPassword());
         try {
-            this.context = new InitialLdapContext(env, null);
+            if (null == context) {
+                Hashtable<String, Object> env = new Hashtable<>();
+                String url = "ldap://" + properties.getHost() + ":" + properties.getPort();
+                env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+                env.put(Context.PROVIDER_URL, url);
+                env.put(Context.SECURITY_AUTHENTICATION, "simple");
+                env.put(Context.SECURITY_PRINCIPAL, properties.getAccountDN());
+                env.put(Context.SECURITY_CREDENTIALS, properties.getPassword());
+                context = new InitialLdapContext(env, null);
+            }
         } catch (NamingException e) {
             throw new LdapException(e);
         }
@@ -45,6 +47,7 @@ public class JndiLdapDialect extends AbstractLdapDialect {
     public void close() throws LdapException {
         try {
             context.close();
+            context = null;
         } catch (NamingException e) {
             throw new LdapException(e);
         }

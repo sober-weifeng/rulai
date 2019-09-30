@@ -25,8 +25,13 @@ public class JldapLdapDialect extends AbstractLdapDialect {
     @Override
     public void connect() throws LdapException {
         try {
-            connection.connect(properties.getHost(), properties.getPort());
-            connection.bind(properties.getVersion(), properties.getUsername(), properties.getPassword().getBytes("UTF8"));
+            if (null == connection) {
+                connection = new LDAPConnection();
+            }
+            if (!connection.isConnected()) {
+                connection.connect(properties.getHost(), properties.getPort());
+                connection.bind(properties.getVersion(), properties.getAccountDN(), properties.getPassword().getBytes("UTF8"));
+            }
         } catch (LDAPException | UnsupportedEncodingException e) {
             throw new LdapException(e);
         }
