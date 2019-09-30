@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @date 2019/9/30 11:32
  */
 @Slf4j
-public class HbaseDialect {
+public class HBaseDialect {
 
     private Configuration configuration;
 
@@ -33,16 +33,16 @@ public class HbaseDialect {
 
     private Admin admin;
 
-    public HbaseDialect(Configuration configuration) throws HbaseException {
+    public HBaseDialect(Configuration configuration) throws HBaseException {
         try {
             this.configuration = configuration;
             this.connection = ConnectionFactory.createConnection(this.configuration);
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
-    public void connect() throws HbaseException {
+    public void connect() throws HBaseException {
         try {
             if (null == connection || connection.isClosed()) {
                 connection = ConnectionFactory.createConnection(this.configuration);
@@ -51,11 +51,11 @@ public class HbaseDialect {
                 admin = connection.getAdmin();
             }
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
-    public void close() throws HbaseException {
+    public void close() throws HBaseException {
         try {
             if (null != admin) {
                 admin.close();
@@ -66,34 +66,63 @@ public class HbaseDialect {
                 connection = null;
             }
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
     /**
      * 创建表
-     * @param tableName    表名
-     * @param columnFamily 列族名
+     * @param tableName      表名
+     * @param columnFamilies 列族名
      * @return
+     * @throws HBaseException
      */
-    public boolean creatTable(String tableName, List<String> columnFamily) throws HbaseException {
+    public boolean createTable(String tableName, String... columnFamilies) throws HBaseException {
         try {
-            List<ColumnFamilyDescriptor> familyDescriptors = columnFamily.stream()
+            List<ColumnFamilyDescriptor> familyDescriptors = Arrays.stream(columnFamilies)
                     .map(e -> ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(e)).build())
                     .collect(Collectors.toList());
-            TableDescriptor tableDescriptor = TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName))
-                    .setColumnFamilies(familyDescriptors)
-                    .build();
-            if (admin.tableExists(TableName.valueOf(tableName))) {
-                log.debug("table Exists!");
-            } else {
-                admin.createTable(tableDescriptor);
-                log.debug("create table Success!");
-            }
-            return true;
+            return createTable0(tableName, familyDescriptors);
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
+    }
+
+    /**
+     * 创建表
+     * @param tableName      表名
+     * @param columnFamilies 列族名
+     * @return
+     */
+    public boolean createTable(String tableName, List<String> columnFamilies) throws HBaseException {
+        try {
+            List<ColumnFamilyDescriptor> familyDescriptors = columnFamilies.stream()
+                    .map(e -> ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(e)).build())
+                    .collect(Collectors.toList());
+            return createTable0(tableName, familyDescriptors);
+        } catch (IOException e) {
+            throw new HBaseException(e);
+        }
+    }
+
+    /**
+     * 创建表
+     * @param tableName 表名
+     * @param familyDescriptors 列族对象
+     * @return
+     * @throws IOException
+     */
+    private boolean createTable0(String tableName, List<ColumnFamilyDescriptor> familyDescriptors) throws IOException {
+        TableDescriptor tableDescriptor = TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName))
+                .setColumnFamilies(familyDescriptors)
+                .build();
+        if (admin.tableExists(TableName.valueOf(tableName))) {
+            log.debug("table Exists!");
+        } else {
+            admin.createTable(tableDescriptor);
+            log.debug("create table Success!");
+        }
+        return true;
     }
 
     /**
@@ -104,7 +133,7 @@ public class HbaseDialect {
      * @return 是否创建成功
      */
     public boolean createTableBySplitKeys(String tableName, List<String> columnFamily, byte[][] splitKeys)
-            throws HbaseException {
+            throws HBaseException {
         try {
             if (admin.tableExists(TableName.valueOf(tableName))) {
                 return true;
@@ -118,7 +147,7 @@ public class HbaseDialect {
             admin.createTable(tableDescriptor, splitKeys);
             return true;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -175,16 +204,16 @@ public class HbaseDialect {
     /**
      * 查询库中所有表的表名
      * @return
-     * @throws HbaseException
+     * @throws HBaseException
      */
-    public List<String> getAllTableNames() throws HbaseException {
+    public List<String> getAllTableNames() throws HBaseException {
         try {
             TableName[] tableNames = admin.listTableNames();
             return Arrays.stream(tableNames)
                     .map(TableName::getNameAsString)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -193,7 +222,7 @@ public class HbaseDialect {
      * @param tableName
      * @return
      */
-    public Map<String, Map<String, String>> getResultScanner(String tableName) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScanner(String tableName) throws HBaseException {
         return queryData(tableName, new Scan());
     }
 
@@ -204,7 +233,7 @@ public class HbaseDialect {
      * @param stopRowKey  结束rowKey
      * @return
      */
-    public Map<String, Map<String, String>> getResultScanner(String tableName, String startRowKey, String stopRowKey) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScanner(String tableName, String startRowKey, String stopRowKey) throws HBaseException {
         Scan scan = new Scan();
         if (StringUtils.isNotBlank(startRowKey) && StringUtils.isNotBlank(stopRowKey)) {
             scan.withStartRow(Bytes.toBytes(startRowKey));
@@ -219,7 +248,7 @@ public class HbaseDialect {
      * @param prefix    以prefix开始的行键
      * @return
      */
-    public Map<String, Map<String, String>> getResultScannerPrefixFilter(String tableName, String prefix) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScannerPrefixFilter(String tableName, String prefix) throws HBaseException {
         Scan scan = new Scan();
         if (StringUtils.isNoneBlank(prefix)) {
             Filter filter = new PrefixFilter(Bytes.toBytes(prefix));
@@ -234,7 +263,7 @@ public class HbaseDialect {
      * @param prefix    以prefix开始的列名
      * @return
      */
-    public Map<String, Map<String, String>> getResultScannerColumnPrefixFilter(String tableName, String prefix) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScannerColumnPrefixFilter(String tableName, String prefix) throws HBaseException {
         Scan scan = new Scan();
         if (StringUtils.isNotBlank(prefix)) {
             Filter filter = new ColumnPrefixFilter(Bytes.toBytes(prefix));
@@ -249,7 +278,7 @@ public class HbaseDialect {
      * @param keyword   包含指定关键词的行键
      * @return
      */
-    public Map<String, Map<String, String>> getResultScannerRowFilter(String tableName, String keyword) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScannerRowFilter(String tableName, String keyword) throws HBaseException {
         Scan scan = new Scan();
         if (StringUtils.isNotBlank(keyword)) {
             Filter filter = new RowFilter(CompareOperator.GREATER_OR_EQUAL, new SubstringComparator(keyword));
@@ -264,7 +293,7 @@ public class HbaseDialect {
      * @param keyword   包含指定关键词的列名
      * @return
      */
-    public Map<String, Map<String, String>> getResultScannerQualifierFilter(String tableName, String keyword) throws HbaseException {
+    public Map<String, Map<String, String>> getResultScannerQualifierFilter(String tableName, String keyword) throws HBaseException {
         Scan scan = new Scan();
         if (StringUtils.isNotBlank(keyword)) {
             Filter filter = new QualifierFilter(CompareOperator.GREATER_OR_EQUAL, new SubstringComparator(keyword));
@@ -279,7 +308,7 @@ public class HbaseDialect {
      * @param scan      过滤条件
      * @return
      */
-    private Map<String, Map<String, String>> queryData(String tableName, Scan scan) throws HbaseException {
+    private Map<String, Map<String, String>> queryData(String tableName, Scan scan) throws HBaseException {
         try {
             Map<String, Map<String, String>> result = Maps.newHashMap();
             Table table = getTable(tableName);
@@ -300,7 +329,7 @@ public class HbaseDialect {
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -309,9 +338,9 @@ public class HbaseDialect {
      * @param tableName 表名
      * @param rowKey    行键
      * @return 返回一行的数据
-     * @throws HbaseException
+     * @throws HBaseException
      */
-    public Map<String, String> getRowData(String tableName, String rowKey) throws HbaseException {
+    public Map<String, String> getRowData(String tableName, String rowKey) throws HBaseException {
         try {
             Map<String, String> result = Maps.newHashMap();
             Get get = new Get(Bytes.toBytes(rowKey));
@@ -325,7 +354,7 @@ public class HbaseDialect {
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -336,9 +365,9 @@ public class HbaseDialect {
      * @param familyName 列族名
      * @param columnName 列名
      * @return
-     * @throws HbaseException
+     * @throws HBaseException
      */
-    public String getColumnValue(String tableName, String rowKey, String familyName, String columnName) throws HbaseException {
+    public String getColumnValue(String tableName, String rowKey, String familyName, String columnName) throws HBaseException {
         try {
             String value = null;
             Get get = new Get(Bytes.toBytes(rowKey));
@@ -352,7 +381,7 @@ public class HbaseDialect {
             }
             return value;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -366,7 +395,7 @@ public class HbaseDialect {
      * @return
      */
     public List<String> getColumnValuesByVersion(String tableName, String rowKey, String familyName, String columnName, int versions)
-            throws HbaseException {
+            throws HBaseException {
         try {
             List<String> result = Lists.newArrayList();
             Get get = new Get(Bytes.toBytes(rowKey));
@@ -381,7 +410,7 @@ public class HbaseDialect {
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -393,12 +422,12 @@ public class HbaseDialect {
      * @param columns    列名数组
      * @param values     列值得数组
      */
-    public void putData(String tableName, String rowKey, String familyName, String[] columns, String[] values) throws HbaseException {
+    public void putData(String tableName, String rowKey, String familyName, String[] columns, String[] values) throws HBaseException {
         try {
             Table table = getTable(tableName);
             putData(table, rowKey, familyName, columns, values);
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
@@ -431,33 +460,33 @@ public class HbaseDialect {
 
     /**
      * 为表的某个单元格赋值
-     * @param tableName 表名
-     * @param rowKey rowKey
+     * @param tableName  表名
+     * @param rowKey     rowKey
      * @param familyName 列族名
      * @param columnName 列名
-     * @param value 列值
-     * @throws HbaseException
+     * @param value      列值
+     * @throws HBaseException
      */
-    public void setColumnValue(String tableName, String rowKey, String familyName, String columnName, String value) throws HbaseException {
+    public void setColumnValue(String tableName, String rowKey, String familyName, String columnName, String value) throws HBaseException {
         try {
             Table table = getTable(tableName);
             Put put = new Put(Bytes.toBytes(rowKey));
             put.addColumn(Bytes.toBytes(familyName), Bytes.toBytes(columnName), Bytes.toBytes(value));
             table.put(put);
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
     /**
      * 删除指定的单元格
-     * @param tableName 表名
-     * @param rowKey rowKey
+     * @param tableName  表名
+     * @param rowKey     rowKey
      * @param familyName 列族名
      * @param columnName 列名
      * @return
      */
-    public boolean deleteColumn(String tableName, String rowKey, String familyName, String columnName) throws HbaseException {
+    public boolean deleteColumn(String tableName, String rowKey, String familyName, String columnName) throws HBaseException {
         try {
             boolean result = false;
             if (admin.tableExists(TableName.valueOf(tableName))) {
@@ -469,18 +498,18 @@ public class HbaseDialect {
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
     /**
      * 根据rowKey删除指定的行
      * @param tableName 表名
-     * @param rowKey rowKey
+     * @param rowKey    rowKey
      * @return
-     * @throws HbaseException
+     * @throws HBaseException
      */
-    public boolean deleteRow(String tableName, String rowKey) throws HbaseException {
+    public boolean deleteRow(String tableName, String rowKey) throws HBaseException {
         try {
             boolean result = false;
             if (admin.tableExists(TableName.valueOf(tableName))) {
@@ -491,42 +520,42 @@ public class HbaseDialect {
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
     /**
      * 根据columnFamily删除指定的列族
-     * @param tableName 表名
+     * @param tableName    表名
      * @param columnFamily 列族
      * @return
-     * @throws HbaseException
+     * @throws HBaseException
      */
-    public boolean deleteColumnFamily(String tableName, String columnFamily) throws HbaseException {
+    public boolean deleteColumnFamily(String tableName, String columnFamily) throws HBaseException {
         try {
             boolean result = false;
-            if(admin.tableExists(TableName.valueOf(tableName))){
+            if (admin.tableExists(TableName.valueOf(tableName))) {
                 admin.deleteColumnFamily(TableName.valueOf(tableName), Bytes.toBytes(columnFamily));
                 result = true;
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
-    
-    public boolean deleteTable(String tableName) throws HbaseException {
+
+    public boolean deleteTable(String tableName) throws HBaseException {
         try {
             boolean result = false;
             TableName tableNameObj = TableName.valueOf(tableName);
-            if(admin.tableExists(tableNameObj)){
+            if (admin.tableExists(tableNameObj)) {
                 admin.disableTable(tableNameObj);
                 admin.deleteTable(tableNameObj);
                 result = true;
             }
             return result;
         } catch (IOException e) {
-            throw new HbaseException(e);
+            throw new HBaseException(e);
         }
     }
 
