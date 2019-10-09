@@ -16,6 +16,7 @@
         <module>rulai-antlr</module>
         <module>rulai-ldap</module>
         <module>rulai-bigdata</module>
+        <module>rulai-component</module>
     </modules>
     <name>rulai</name>
     <description>rulai project for Spring Boot</description>
