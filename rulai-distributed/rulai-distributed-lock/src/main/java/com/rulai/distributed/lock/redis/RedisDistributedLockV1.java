@@ -12,7 +12,7 @@ import java.util.Collections;
  * @see Jedis
  * @date 2019/9/25 18:02
  */
-public class RedisDistributedLock {
+public class RedisDistributedLockV1 {
     
     private static final String LOCK_SUCCESS = "OK";
     private static final Long UNLOCK_SUCCESS = 1L;
@@ -25,18 +25,18 @@ public class RedisDistributedLock {
     
     private long lockTime;
     
-    private RedisDistributedLock(Jedis jedis, String key, long lockTime) {
+    private RedisDistributedLockV1(Jedis jedis, String key, long lockTime) {
         this.jedis = jedis;
         this.key = key;
         this.lockTime = lockTime;
     }
 
-    public static RedisDistributedLock build(Jedis jedis, String key) {
+    public static RedisDistributedLockV1 build(Jedis jedis, String key) {
         return build(jedis, key, DEFAULT_MAX_LOCK_TIME);
     }
     
-    public static RedisDistributedLock build(Jedis jedis, String key, long lockTime) {
-        return new RedisDistributedLock(jedis, key, lockTime);
+    public static RedisDistributedLockV1 build(Jedis jedis, String key, long lockTime) {
+        return new RedisDistributedLockV1(jedis, key, lockTime);
     }
     
     public boolean lock() {

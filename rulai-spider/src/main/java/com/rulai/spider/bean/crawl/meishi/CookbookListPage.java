@@ -60,7 +60,7 @@ public class CookbookListPage {
                 return result.fail("该页面重定向后不是当前页面了，跳过爬取");
             }
             List<HtmlElement> contentElements = page.getByXPath("//div[@id='J_list']//li//div[@class='detail']/h2/a");
-            List<CookbookUrl> cookbookUrls = contentElements.stream().map(e -> {
+            List<CookbookUrl> cookbookUrls = contentElements.parallelStream().map(e -> {
                 CookbookUrl cookbookUrl = new CookbookUrl();
                 cookbookUrl.setCookbookUrl(e.getAttribute("href"));
                 cookbookUrl.setCookbookName(e.asText());

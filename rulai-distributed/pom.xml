@@ -15,6 +15,7 @@
     <modules>
         <module>rulai-distributed-lock</module>
         <module>rulai-distributed-algorithm</module>
+        <module>rulai-distributed-redis</module>
     </modules>
 
 
