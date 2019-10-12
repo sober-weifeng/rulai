@@ -8,6 +8,8 @@ package com.rulai.ldap;
  */
 public class LdapException extends Exception {
 
+    private static final long serialVersionUID = -1397859639591205312L;
+
     public LdapException() {
         super();
     }
