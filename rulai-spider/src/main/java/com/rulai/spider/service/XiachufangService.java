@@ -24,12 +24,12 @@ import com.rulai.spider.manager.XiachufangCategoryCookbookRelationManager;
 import com.rulai.spider.manager.XiachufangCategoryManager;
 import com.rulai.spider.manager.XiachufangCookbookDetailManager;
 import com.rulai.spider.manager.XiachufangCookbookUrlManager;
-import com.rulai.spider.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -130,7 +130,7 @@ public class XiachufangService {
             if (splitterDTO.getTotalCount() == 0) {
                 return result.success("无未爬取的分类页面");
             }
-            int splitNum = 2;
+            int splitNum = 5;
             BigDecimal numSplits = new BigDecimal(splitNum);
             BigDecimal minVal = splitterDTO.getMinVal();
             BigDecimal maxVal = splitterDTO.getMaxVal();
@@ -153,21 +153,27 @@ public class XiachufangService {
                     WebClient webClient = HtmlUnitHelper.getWebClient();
                     for (XiachufangCategoryDO categoryDO : categoryDOS) {
                         log.info("现在爬取该分片 {} 第 {} 条数据，还剩 {} 条数据", splitterClause, ++index, size - index);
+                        try {
+                            webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
+                        } catch (IOException e) {
+                            log.error("设置代理失败，用本地网络爬");
+                        }
                         String categoryUrl = categoryDO.getCategoryUrl();
                         CookbookListPage cookbookListPage = new CookbookListPage();
                         cookbookListPage.setNextUrl(categoryUrl);
                         cookbookListPage.setHasNext(true);
                         boolean isSuccess = true;
                         while (cookbookListPage.isHasNext()) {
-                            try {
-                                long time = CommonUtils.generateRandomMillisecond();
-                                log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
-                                Thread.sleep(time);
-                            } catch (InterruptedException e) {
-                                log.error("线程暂停错误");
-                                log.error(e.getMessage(), e);
-                            }
+//                            try {
+//                                long time = CommonUtils.generateRandomMillisecond();
+//                                log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
+//                                Thread.sleep(time);
+//                            } catch (InterruptedException e) {
+//                                log.error("线程暂停错误");
+//                                log.error(e.getMessage(), e);
+//                            }
                             String url = cookbookListPage.getNextUrl();
+                            webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
                             BizResult<CookbookListPage> crawlResult = CookbookListPage.crawl(url, webClient);
                             if (crawlResult.isFail()) {
                                 log.error(crawlResult.getMessage());
@@ -247,7 +253,7 @@ public class XiachufangService {
             if (splitterDTO.getTotalCount() == 0) {
                 return result.success("无未爬取的有效的菜谱页面");
             }
-            int splitNum = 1;
+            int splitNum = 10;
             BigDecimal numSplits = new BigDecimal(splitNum);
             BigDecimal minVal = splitterDTO.getMinVal();
             BigDecimal maxVal = splitterDTO.getMaxVal();
@@ -270,15 +276,21 @@ public class XiachufangService {
                     int index = 0;
                     for (XiachufangCookbookUrlDO cookbookUrlDO : cookbookUrlDOS) {
                         log.info("现在爬取该分片 {} 第 {} 条数据，还剩 {} 条数据", splitterClause, ++index, size - index);
-                        try {
-                            long time = CommonUtils.generateRandomMillisecond();
-                            log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
-                            Thread.sleep(time);
-                        } catch (InterruptedException e) {
-                            log.error("线程暂停错误");
-                            log.error(e.getMessage(), e);
-                        }
+//                        try {
+//                            long time = CommonUtils.generateRandomMillisecond();
+//                            log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
+//                            Thread.sleep(time);
+//                        } catch (InterruptedException e) {
+//                            log.error("线程暂停错误");
+//                            log.error(e.getMessage(), e);
+//                        }
                         String url = cookbookUrlDO.getCookbookUrl();
+                        webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+                        try {
+                            webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
+                        } catch (IOException e) {
+                            log.error("设置代理失败，用本地网络爬");
+                        }
                         BizResult<CookbookDetailPage> crawlResult = CookbookDetailPage.crawl(url, webClient);
                         if (crawlResult.isFail()) {
                             log.error(crawlResult.getMessage());

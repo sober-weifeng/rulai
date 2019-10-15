@@ -1,5 +1,7 @@
 package com.rulai.spider.components;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.google.common.collect.Lists;
@@ -11,6 +13,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -29,26 +33,30 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HtmlUnitHelper {
 
-    private static List<ProxyConfig> httpProxies = Lists.newArrayList();
-    private static List<ProxyConfig> httpsProxies = Lists.newArrayList();
-    
-    static {
-        httpProxies.add(new ProxyConfig("124.207.82.166", 8008));
-//        httpProxies.add(new ProxyConfig("180.117.128.143", 8118));
-//        httpProxies.add(new ProxyConfig("27.128.187.22", 3128));
-        httpProxies.add(new ProxyConfig("120.25.253.234", 8118));
-        httpProxies.add(new ProxyConfig("222.249.238.138", 8080));
-//        httpProxies.add(new ProxyConfig("222.240.184.126", 8086));
-        
-//        httpsProxies.add(new ProxyConfig("119.39.68.130", 808));
-        httpsProxies.add(new ProxyConfig("61.128.208.94", 3128));
-//        httpsProxies.add(new ProxyConfig("113.119.38.204", 3128));
-        httpsProxies.add(new ProxyConfig("27.191.234.69", 9999));
-//        httpsProxies.add(new ProxyConfig("124.205.143.213", 32612));
-        httpsProxies.add(new ProxyConfig("124.232.133.199", 3128));
-//        httpsProxies.add(new ProxyConfig("221.229.252.98", 8080));
-        httpsProxies.add(new ProxyConfig("120.78.225.5", 3128));
-    }
+    private static List<String> userAgents = Lists.newArrayList(
+            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36 OPR/26.0.1656.60"
+            , "Opera/8.0 (Windows NT 5.1; U; en)"
+            , "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.50"
+            , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 9.50"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
+            , "Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36"
+            , "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11"
+            , "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.133 Safari/534.16"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.11 TaoBrowser/2.0 Safari/536.11"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER"
+            , "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; LBBROWSER)"
+            , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; QQDownload 732; .NET4.0C; .NET4.0E; LBBROWSER)"
+            , "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; QQBrowser/7.0.3698.400)"
+            , "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; QQDownload 732; .NET4.0C; .NET4.0E)"
+            , "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.84 Safari/535.11 SE 2.X MetaSr 1.0"
+            , "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SV1; QQDownload 732; .NET4.0C; .NET4.0E; SE 2.X MetaSr 1.0)"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.4.3.4000 Chrome/30.0.1599.101 Safari/537.36"
+            , "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 UBrowser/4.0.3214.0 Safari/537.36"
+    );
     
     public static WebClient getWebClient() {
         return getWebClient(Boolean.FALSE.booleanValue());
@@ -59,7 +67,7 @@ public class HtmlUnitHelper {
      * @return
      */
     public static WebClient getWebClient(boolean javaScriptEnabled) {
-        int timeout = 60000;
+        int timeout = 120000;
         int waitForBackgroundJavaScript = 20000;
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
@@ -141,43 +149,43 @@ public class HtmlUnitHelper {
         return !isSuccessPage(page);
     }
 
-    public static void main(String[] args) {
-        int timeout = 60000;
-        int waitForBackgroundJavaScript = 20000;
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setActiveXNative(false);
-        webClient.getOptions().setCssEnabled(false);
-        webClient.getOptions().setJavaScriptEnabled(false);
-        webClient.getOptions().setTimeout(timeout);
-        webClient.setJavaScriptTimeout(timeout);
-        webClient.waitForBackgroundJavaScript(waitForBackgroundJavaScript);
+    /**
+     * 随机获取user agent
+     * @return
+     */
+    public static String getRandomUserAgent() {
+        return userAgents.get(new Random().nextInt(userAgents.size()));
+    }
 
-        String httpsUrl = "https://www.163.com";
-        String httpUrl = "http://www.xiachufang.com/category/40078/";
-        for (ProxyConfig httpsProxy : httpsProxies) {
-            webClient.getOptions().setProxyConfig(httpsProxy);
-            try {
-                Page page = webClient.getPage(httpsUrl);
-                int responseCode = page.getWebResponse().getStatusCode();
-                log.info("https proxy {} {} success, code = {}", httpsProxy.getProxyHost(), httpsProxy.getProxyPort(), responseCode);
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                log.info("https proxy {} {} error", httpsProxy.getProxyHost(), httpsProxy.getProxyPort());
-            }
+    /**
+     * 随机获取一个代理ip
+     * @return
+     * @throws IOException
+     */
+    public static String getRandomProxyIp() throws IOException {
+        String proxyUrl = "http://10.0.10.101:5010/get/";
+        String proxy = "";
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(proxyUrl);
+        CloseableHttpResponse response = httpclient.execute(httpGet);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            HttpEntity entity = response.getEntity();
+            String body = EntityUtils.toString(entity, "utf-8");
+            JSONObject data = JSON.parseObject(body);
+            proxy = data.getString("proxy");
         }
+        return proxy;
+    }
+    
+    public static ProxyConfig getRandomProxyConfig() throws IOException {
+        String proxy = getRandomProxyIp();
+        String[] ipAndPort = proxy.split(":");
+        return new ProxyConfig(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+    }
 
-        for (ProxyConfig httpProxy : httpProxies) {
-            webClient.getOptions().setProxyConfig(httpProxy);
-            try {
-                Page page = webClient.getPage(httpUrl);
-                int responseCode = page.getWebResponse().getStatusCode();
-                log.info("http proxy {} {} success, code = {}", httpProxy.getProxyHost(), httpProxy.getProxyPort(), responseCode);
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                log.info("http proxy {} {} error", httpProxy.getProxyHost(), httpProxy.getProxyPort());
-            }
+    public static void main(String[] args) throws IOException {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(getRandomProxyIp());
         }
     }
 

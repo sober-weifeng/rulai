@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class CookbookListPage {
     
     public static final String PREFIX = "http://www.xiachufang.com/category";
+    public static final String PHONE_PREFIX = "https://m.xiachufang.com/category";
     
     private String originUrl;
     
@@ -44,6 +46,7 @@ public class CookbookListPage {
     public static BizResult<CookbookListPage> crawl(String url, WebClient webClient) {
         BizResult<CookbookListPage> result = BizResult.custom();
         try {
+            String phoneUrl = url.replace("http://www", "https://m");
             String httpPrefix = "http://www.xiachufang.com";
             log.info("爬取分类食谱列表页面：{}", url);
             HtmlPage page = webClient.getPage(url);
@@ -52,12 +55,15 @@ public class CookbookListPage {
                 return result.fail("获取页面不正确");
             }
             String redirectUrl = page.getUrl().toString();
-            if (!(redirectUrl.startsWith(PREFIX))) {
-                log.error("该页面重定向后不是分类食谱列表页面，爬取方式不同");
+            if (!redirectUrl.equals(url)) {
+                log.info("重定向后页面：{}", redirectUrl);
+            }
+            if (!(redirectUrl.startsWith(PREFIX) || redirectUrl.startsWith(PHONE_PREFIX))) {
+                log.error("该页面重定向后不是分类食谱列表页面，爬取方式不同, redirectUrl = {}", redirectUrl);
                 return result.fail("该页面重定向后不是分类食谱列表页面，爬取方式不同");
             }
-            if (!redirectUrl.equals(url)) {
-                log.error("该页面重定向后不是当前页面了，跳过爬取");
+            if (!(redirectUrl.equals(url) || redirectUrl.equals(phoneUrl))) {
+                log.error("该页面重定向后不是当前页面了，跳过爬取, redirectUrl = {}", redirectUrl);
                 return result.fail("该页面重定向后不是当前页面了，跳过爬取");
             }
             List<HtmlElement> contentElements = page.getByXPath("//ul[@class='list']/li//p[@class='name']//a");
@@ -79,13 +85,16 @@ public class CookbookListPage {
             result.success().data(cookbookListPage);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            log.error("爬取页面异常, url: {}", url);
             result.fail(BizResultCodeEnum.EXCEPTION);
         }
         return result;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         WebClient webClient = HtmlUnitHelper.getWebClient();
+        webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+        webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
         String url = "http://www.xiachufang.com/category/40075/";
         log.info(JSON.toJSONString(crawl(url, webClient)));
         webClient.close();
