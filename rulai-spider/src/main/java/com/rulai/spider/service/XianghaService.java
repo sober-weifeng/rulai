@@ -30,6 +30,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -152,20 +153,26 @@ public class XianghaService {
                     int index = 0;
                     for (XianghaCategoryDO categoryDO : categoryDOS) {
                         log.info("现在爬取该分片 {} 第 {} 条数据，还剩 {} 条数据", splitterClause, ++index, size - index);
+                        try {
+                            webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
+                        } catch (IOException e) {
+                            log.error("设置代理失败，用本地网络爬");
+                        }
                         String categoryUrl = categoryDO.getCategoryUrl();
                         CookbookListPage cookbookListPage = new CookbookListPage();
                         cookbookListPage.setNextUrl(categoryUrl);
                         cookbookListPage.setHasNext(true);
                         boolean isSuccess = true;
                         while (cookbookListPage.isHasNext()) {
-                            try {
-                                long time = CommonUtils.generateRandomMillisecond();
-                                log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
-                                Thread.sleep(time);
-                            } catch (InterruptedException e) {
-                                log.error("线程暂停错误");
-                                log.error(e.getMessage(), e);
-                            }
+//                            try {
+//                                long time = CommonUtils.generateRandomMillisecond();
+//                                log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
+//                                Thread.sleep(time);
+//                            } catch (InterruptedException e) {
+//                                log.error("线程暂停错误");
+//                                log.error(e.getMessage(), e);
+//                            }
+                            webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
                             String url = cookbookListPage.getNextUrl();
                             BizResult<CookbookListPage> crawlResult = CookbookListPage.crawl(url, webClient);
                             if (crawlResult.isFail()) {
