@@ -59,10 +59,21 @@ public class CookbookDetailPage {
                 log.error("该页面不是食谱明细页面，爬取方式不同");
                 return result.fail("该页面不是食谱明细页面，爬取方式不同");
             }
-            HtmlPage page = webClient.getPage(url);
+            HtmlPage page;
+            try {
+                page = webClient.getPage(url);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return result.fail(BizResultCodeEnum.PROXY_ERROR);
+            }
             if (HtmlUnitHelper.isFailPage(page)) {
-                log.error("获取页面不正确，url：{}", url);
-                return result.fail("获取页面不正确");
+                int responseCode = page.getWebResponse().getStatusCode();
+                if (responseCode != 200) {
+                    return result.fail(BizResultCodeEnum.PROXY_ERROR);
+                } else {
+                    log.error("获取页面不正确，url：{}", url);
+                    return result.fail("获取页面不正确");
+                }
             }
             String redirectUrl = page.getUrl().toString();
             if (!(redirectUrl.startsWith(HTTP_PREFIX))) {
@@ -114,7 +125,7 @@ public class CookbookDetailPage {
 
     public static void main(String[] args) {
         WebClient webClient = HtmlUnitHelper.getWebClient();
-        String url = "http://www.xiachufang.com/recipe/101696601/";
+        String url = "http://www.xiachufang.com/recipe/100498308/";
         log.info(JSON.toJSONString(crawl(url, webClient)));
         webClient.close();
     }

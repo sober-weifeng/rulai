@@ -26,6 +26,7 @@ import com.rulai.spider.manager.XiachufangCookbookDetailManager;
 import com.rulai.spider.manager.XiachufangCookbookUrlManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -243,6 +244,107 @@ public class XiachufangService {
         return result;
     }
 
+    public BizResult crawlCookbookUrlUseThread() {
+        BizResult result = BizResult.custom();
+        try {
+            List<XiachufangCategoryDO> categoryDOS = categoryManager.selectNotCrawled();
+            if (CollectionUtils.isEmpty(categoryDOS)) {
+                return result.success("无未爬取内容");
+            }
+            ExecutorService fixedThreadPool = new ThreadPoolExecutor(10, 10,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>());
+            for (XiachufangCategoryDO categoryDO : categoryDOS) {
+                fixedThreadPool.submit(() -> {
+                    WebClient webClient = HtmlUnitHelper.getWebClient();
+                    try {
+                        webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
+                    } catch (IOException e) {
+                        log.error("设置代理失败，用本地网络爬");
+                    }
+                    String categoryUrl = categoryDO.getCategoryUrl();
+                    CookbookListPage cookbookListPage = new CookbookListPage();
+                    cookbookListPage.setNextUrl(categoryUrl);
+                    cookbookListPage.setHasNext(true);
+                    boolean isSuccess = true;
+                    while (cookbookListPage.isHasNext()) {
+//                            try {
+//                                long time = CommonUtils.generateRandomMillisecond();
+//                                log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
+//                                Thread.sleep(time);
+//                            } catch (InterruptedException e) {
+//                                log.error("线程暂停错误");
+//                                log.error(e.getMessage(), e);
+//                            }
+                        String url = cookbookListPage.getNextUrl();
+                        webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+                        BizResult<CookbookListPage> crawlResult = CookbookListPage.crawl(url, webClient);
+                        if (crawlResult.isFail()) {
+                            log.error(crawlResult.getMessage());
+                            cookbookListPage = new CookbookListPage();
+                            cookbookListPage.setHasNext(false);
+                            isSuccess = false;
+                            continue;
+                        }
+                        cookbookListPage = crawlResult.getData();
+                        for (CookbookListPage.CookbookUrl cookbookUrl : cookbookListPage.getCookbookUrls()) {
+                            try {
+                                String urlValue = cookbookUrl.getCookbookUrl();
+                                XiachufangCookbookUrlDO cookbookUrlDO = new XiachufangCookbookUrlDO();
+                                cookbookUrlDO.setIsCrawled(IsCrawledEnum.NO.getCode());
+                                cookbookUrlDO.setCookbookName(cookbookUrl.getCookbookName());
+                                cookbookUrlDO.setCookbookUrl(urlValue);
+                                cookbookUrlDO.setIsEffective(IsEffectiveEnum.YES.getCode());
+                                XiachufangCookbookUrlDO currentUrlDO = cookbookUrlManager.selectByCookbookUrl(urlValue);
+                                if (null != currentUrlDO) {
+                                    cookbookUrlDO.setId(currentUrlDO.getId());
+                                    if (!cookbookUrlDO.getCookbookName().equals(currentUrlDO.getCookbookName())) {
+                                        log.info("修改食谱URL数据");
+                                        cookbookUrlManager.updateByPrimaryKeySelective(cookbookUrlDO);
+                                    }
+                                } else {
+                                    log.info("新增食谱URL数据");
+                                    cookbookUrlManager.insertSelective(cookbookUrlDO);
+                                }
+                                XiachufangCategoryCookbookRelationDO currentRelationDO =
+                                        categoryCookbookRelationManager.selectByCookbookUrlIdAndCategoryId(cookbookUrlDO.getId(), categoryDO.getId());
+                                if (null != currentRelationDO) {
+                                    if (!url.equals(currentRelationDO.getCategoryLocationUrl())) {
+                                        log.info("修改分类关系");
+                                        currentRelationDO.setCategoryLocationUrl(url);
+                                        categoryCookbookRelationManager.updateByPrimaryKeySelective(currentRelationDO);
+                                    }
+                                } else {
+                                    log.info("新增分类关系");
+                                    currentRelationDO = new XiachufangCategoryCookbookRelationDO();
+                                    currentRelationDO.setCategoryId(categoryDO.getId());
+                                    currentRelationDO.setCookbookUrlId(cookbookUrlDO.getId());
+                                    currentRelationDO.setCategoryLocationUrl(url);
+                                    categoryCookbookRelationManager.insertSelective(currentRelationDO);
+                                }
+                            } catch (Exception e) {
+                                log.error("存储页面数据错误：{}", url);
+                                log.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                    if (isSuccess) {
+                        categoryDO.setIsCrawled(IsCrawledEnum.YES.getCode());
+                    } else {
+                        categoryDO.setIsEffective(IsEffectiveEnum.NO.getCode());
+                    }
+                    categoryManager.updateByPrimaryKeySelective(categoryDO);
+                    webClient.close();
+                });
+            }
+            result.success();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            result.fail(BizResultCodeEnum.EXCEPTION);
+        }
+        return result;
+    }
+
     public BizResult crawlCookbookDetailWithSplitter() {
         BizResult result = BizResult.custom();
         try {
@@ -286,13 +388,26 @@ public class XiachufangService {
 //                        }
                         String url = cookbookUrlDO.getCookbookUrl();
                         webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+                        String proxy;
                         try {
-                            webClient.getOptions().setProxyConfig(HtmlUnitHelper.getRandomProxyConfig());
+                            proxy = HtmlUnitHelper.getRandomProxy();
+                            if (StringUtils.isNotEmpty(proxy)) {
+                                webClient.getOptions().setProxyConfig(HtmlUnitHelper.getProxyConfig(proxy));
+                            }
                         } catch (IOException e) {
                             log.error("设置代理失败，用本地网络爬");
+                            proxy = "";
                         }
                         BizResult<CookbookDetailPage> crawlResult = CookbookDetailPage.crawl(url, webClient);
                         if (crawlResult.isFail()) {
+                            if (BizResultCodeEnum.PROXY_ERROR.getCode().equals(crawlResult.getCode())
+                                    && StringUtils.isNotEmpty(proxy)) {
+                                try {
+                                    HtmlUnitHelper.deleteProxy(proxy);
+                                } catch (IOException e) {
+                                    log.error("删除代理失败");
+                                }
+                            }
                             log.error(crawlResult.getMessage());
                             cookbookUrlDO.setIsEffective(IsEffectiveEnum.NO.getCode());
                             cookbookUrlManager.updateByPrimaryKeySelective(cookbookUrlDO);
@@ -339,4 +454,85 @@ public class XiachufangService {
         return result;
     }
 
+    public BizResult crawlCookbookDetailUserThread(boolean isUserProxy) {
+        BizResult result = BizResult.custom();
+        try {
+            List<XiachufangCookbookUrlDO> cookbookUrlDOS = cookbookUrlManager.selectNotCrawled();
+            if (CollectionUtils.isEmpty(cookbookUrlDOS)) {
+                return result.success("无未爬取数据");
+            }
+            ExecutorService fixedThreadPool = new ThreadPoolExecutor(10, 10,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>());
+            for (XiachufangCookbookUrlDO cookbookUrlDO : cookbookUrlDOS) {
+                fixedThreadPool.submit(() -> {
+                    String url = cookbookUrlDO.getCookbookUrl();
+                    WebClient webClient = HtmlUnitHelper.getWebClient();
+                    webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+                    String proxy = "";
+                    if (isUserProxy) {
+                        try {
+                            proxy = HtmlUnitHelper.getRandomProxy();
+                            if (StringUtils.isNotEmpty(proxy)) {
+                                webClient.getOptions().setProxyConfig(HtmlUnitHelper.getProxyConfig(proxy));
+                            }
+                        } catch (IOException e) {
+                            log.error("设置代理失败，用本地网络爬");
+                        }
+                    }
+                    BizResult<CookbookDetailPage> crawlResult = CookbookDetailPage.crawl(url, webClient);
+                    if (crawlResult.isFail()) {
+                        if (isUserProxy 
+                                && BizResultCodeEnum.PROXY_ERROR.getCode().equals(crawlResult.getCode())
+                                && StringUtils.isNotEmpty(proxy)) {
+                            try {
+                                HtmlUnitHelper.deleteProxy(proxy);
+                            } catch (IOException e) {
+                                log.error("删除代理失败");
+                            }
+                        }
+                        log.error(crawlResult.getMessage());
+                        cookbookUrlDO.setIsEffective(IsEffectiveEnum.NO.getCode());
+                        cookbookUrlManager.updateByPrimaryKeySelective(cookbookUrlDO);
+                        return;
+                    }
+                    CookbookDetailPage cookbookDetailPage = crawlResult.getData();
+                    try {
+                        XiachufangCookbookDetailDO cookbookDetailDO = new XiachufangCookbookDetailDO();
+                        cookbookDetailDO.setCookbookUrlId(cookbookUrlDO.getId());
+                        cookbookDetailDO.setTitle(cookbookDetailPage.getTitle());
+                        cookbookDetailDO.setCoverPicture(cookbookDetailPage.getCoverPicture());
+                        cookbookDetailDO.setIngredients(JSON.toJSONString(cookbookDetailPage.getIngredients()));
+                        cookbookDetailDO.setSteps(JSON.toJSONString(cookbookDetailPage.getSteps()));
+                        cookbookDetailDO.setTip(cookbookDetailPage.getTip());
+                        XiachufangCookbookDetailDO currentDetailDO = cookbookDetailManager.selectByCookbookUrl(cookbookUrlDO.getId());
+                        if (null != currentDetailDO) {
+                            cookbookDetailDO.setId(currentDetailDO.getId());
+                            cookbookDetailDO.setGmtCreate(currentDetailDO.getGmtCreate());
+                            cookbookDetailDO.setGmtUpdate(currentDetailDO.getGmtUpdate());
+                            if (!cookbookDetailDO.equals(currentDetailDO)) {
+                                log.info("更新食谱明细");
+                                cookbookDetailManager.updateByPrimaryKeySelective(cookbookDetailDO);
+                            }
+                        } else {
+                            log.info("新增食谱明细");
+                            cookbookDetailManager.insertSelective(cookbookDetailDO);
+                        }
+                        log.info("更新爬取状态");
+                        cookbookUrlDO.setIsCrawled(IsCrawledEnum.YES.getCode());
+                        cookbookUrlManager.updateByPrimaryKeySelective(cookbookUrlDO);
+                    } catch (Exception e) {
+                        log.error("存储页面数据错误：{}", url);
+                        log.error(e.getMessage(), e);
+                    }
+                    webClient.close();
+                });
+            }
+            result.success();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            result.fail(BizResultCodeEnum.EXCEPTION);
+        }
+        return result;
+    }
 }

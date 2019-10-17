@@ -67,7 +67,7 @@ public class HtmlUnitHelper {
      * @return
      */
     public static WebClient getWebClient(boolean javaScriptEnabled) {
-        int timeout = 120000;
+        int timeout = 30000;
         int waitForBackgroundJavaScript = 20000;
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
@@ -162,7 +162,7 @@ public class HtmlUnitHelper {
      * @return
      * @throws IOException
      */
-    public static String getRandomProxyIp() throws IOException {
+    public static String getRandomProxy() throws IOException {
         String proxyUrl = "http://10.0.10.101:5010/get/";
         String proxy = "";
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -174,18 +174,30 @@ public class HtmlUnitHelper {
             JSONObject data = JSON.parseObject(body);
             proxy = data.getString("proxy");
         }
+        httpclient.close();
         return proxy;
+    }
+
+    public static ProxyConfig getProxyConfig(String proxy) throws IOException {
+        String[] ipAndPort = proxy.split(":");
+        return new ProxyConfig(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
     }
     
     public static ProxyConfig getRandomProxyConfig() throws IOException {
-        String proxy = getRandomProxyIp();
-        String[] ipAndPort = proxy.split(":");
-        return new ProxyConfig(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+        return getProxyConfig(getRandomProxy());
+    }
+    
+    public static void deleteProxy(String proxy) throws IOException {
+        String url = "http://10.0.10.101:5010/delete/?proxy=" + proxy;
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(url);
+        httpclient.execute(httpGet);
+        httpclient.close();
     }
 
     public static void main(String[] args) throws IOException {
         for (int i = 0; i < 10; i++) {
-            System.out.println(getRandomProxyIp());
+            System.out.println(getRandomProxy());
         }
     }
 

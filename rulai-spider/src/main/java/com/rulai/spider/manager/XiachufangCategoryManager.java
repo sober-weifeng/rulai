@@ -5,6 +5,7 @@ import com.rulai.spider.bean.dto.SplitterDTO;
 import com.rulai.spider.bean.model.XiachufangCategoryDO;
 import com.rulai.spider.bean.query.XiachufangCategoryQuery;
 import com.rulai.spider.enums.IsCrawledEnum;
+import com.rulai.spider.enums.IsEffectiveEnum;
 import com.rulai.spider.mapper.ext.XiachufangCategoryExtMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -154,7 +155,17 @@ public class XiachufangCategoryManager {
 //        query.setPageOffset(0);
         query.createCriteria()
                 .andIsCrawledEqualTo(IsCrawledEnum.NO.getCode())
+                .andIsEffectiveEqualTo(IsEffectiveEnum.YES.getCode())
                 .addCondition(splitterClause);
+        return xiachufangCategoryMapper.selectByQuery(query);
+    }
+    
+    public List<XiachufangCategoryDO> selectNotCrawled() {
+        XiachufangCategoryQuery query = new XiachufangCategoryQuery();
+        query.setOrderByClause("id");
+        query.createCriteria()
+                .andIsCrawledEqualTo(IsCrawledEnum.NO.getCode())
+                .andIsEffectiveEqualTo(IsEffectiveEnum.YES.getCode());
         return xiachufangCategoryMapper.selectByQuery(query);
     }
     

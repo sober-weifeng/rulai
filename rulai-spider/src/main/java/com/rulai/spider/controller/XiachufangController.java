@@ -30,9 +30,19 @@ public class XiachufangController {
         return xiachufangService.crawlCookbookUrlWithSplitter();
     }
 
+    @GetMapping("/crawl-cookbook-url-use-thread")
+    public BizResult crawlCookbookUrlUseThread() {
+        return xiachufangService.crawlCookbookUrlUseThread();
+    }
+
     @GetMapping("/crawl-cookbook-detail-with-splitter")
     public BizResult crawlCookbookDetailWithSplitter() {
         return xiachufangService.crawlCookbookDetailWithSplitter();
+    }
+
+    @GetMapping("/crawl-cookbook-detail-use-thread")
+    public BizResult crawlCookbookDetailUserThread(boolean isUseProxy) {
+        return xiachufangService.crawlCookbookDetailUserThread(isUseProxy);
     }
     
 }

@@ -43,6 +43,8 @@ public enum BizResultCodeEnum {
     // 1003表示通用列表中的登录相关的错误
     LOGOUT_FAILED("1003001", "退出失败"),
     LOGOUT_FAILED_INVALID_SESSION("1003002", "退出失败:无效的会话"),
+    
+    PROXY_ERROR("1004001", "代理失败"),
     ;
 
     private String code;
