@@ -1,6 +1,6 @@
 FROM java:8
 VOLUME ["/tmp", "/opt/soft/rulai/log"]
-ADD target/rulai-spider-0.0.1-SNAPSHOT.jar /opt/soft/rulai/jar/rulai-spider.jar
+ADD /opt/soft/rulai/source/rulai/rulai-spider/target/rulai-spider-0.0.1-SNAPSHOT.jar /opt/soft/rulai/jar/rulai-spider.jar
 RUN bash -c 'touch /opt/soft/rulai/jar/rulai-spider.jar'
 
 EXPOSE 8001
