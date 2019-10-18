@@ -24,9 +24,9 @@ import com.rulai.spider.manager.XianghaCategoryCookbookRelationManager;
 import com.rulai.spider.manager.XianghaCategoryManager;
 import com.rulai.spider.manager.XianghaCookbookDetailManager;
 import com.rulai.spider.manager.XianghaCookbookUrlManager;
-import com.rulai.spider.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -276,15 +276,26 @@ public class XianghaService {
                     WebClient webClient = HtmlUnitHelper.getWebClient();
                     for (XianghaCookbookUrlDO cookbookUrlDO : cookbookUrlDOS) {
                         log.info("现在爬取该分片 {} 第 {} 条数据，还剩 {} 条数据", splitterClause, ++index, size - index);
-                        try {
-                            long time = CommonUtils.generateRandomMillisecond();
-                            log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
-                            Thread.sleep(time);
-                        } catch (InterruptedException e) {
-                            log.error("线程暂停错误");
-                            log.error(e.getMessage(), e);
-                        }
+//                        try {
+//                            long time = CommonUtils.generateRandomMillisecond();
+//                            log.info("该分片 {} 线程 {} 暂停 {} 毫秒", splitterClause, Thread.currentThread().getName(), time);
+//                            Thread.sleep(time);
+//                        } catch (InterruptedException e) {
+//                            log.error("线程暂停错误");
+//                            log.error(e.getMessage(), e);
+//                        }
                         String url = cookbookUrlDO.getCookbookUrl();
+                        webClient.addRequestHeader("User-Agent", HtmlUnitHelper.getRandomUserAgent());
+                        String proxy;
+                        try {
+                            proxy = HtmlUnitHelper.getRandomProxy();
+                            if (StringUtils.isNotEmpty(proxy)) {
+                                webClient.getOptions().setProxyConfig(HtmlUnitHelper.getProxyConfig(proxy));
+                            }
+                        } catch (IOException e) {
+                            log.error("设置代理失败，用本地网络爬");
+                            proxy = "";
+                        }
                         BizResult<CookbookDetailPage> crawlResult = CookbookDetailPage.crawl(url, webClient);
                         if (crawlResult.isFail()) {
                             log.error(crawlResult.getMessage());
