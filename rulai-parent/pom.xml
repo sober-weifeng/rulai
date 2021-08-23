@@ -16,7 +16,7 @@
     <properties>
         <spring-boot.version>2.1.7.RELEASE</spring-boot.version>
         <mybatis-starter.version>2.1.0</mybatis-starter.version>
-        <jsoup.version>1.12.1</jsoup.version>
+        <jsoup.version>1.14.2</jsoup.version>
         <jaxp-api.version>1.4.2</jaxp-api.version>
         <htmlcleaner.version>2.22</htmlcleaner.version>
     </properties>
